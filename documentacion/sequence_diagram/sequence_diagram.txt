@@ -1,0 +1,61 @@
+title Weather App - Diagrama de Secuencia
+
+participant User as "Usuario (Browser)"
+participant LV as "LiveView"
+participant API as "WeatherAPI"
+participant OW as "OpenWeather API"
+participant Fav as "Contexto Favoritos"
+participant Repo as "Repo (DB)"
+
+== Búsqueda de Ciudad ==
+User -> LV: Enviar búsqueda ("query")
+activate LV
+LV -> API: search_city(query)
+activate API
+API -> OW: GET /geo/1.0/direct?q=query&limit=5&appid=API_KEY
+activate OW
+OW --> API: JSON (lista de ciudades)
+deactivate OW
+API -> OW: Por cada ciudad: GET /weather?lat=...&lon=...&appid=API_KEY
+activate OW
+OW --> API: JSON (weather_data)
+deactivate OW
+API --> LV: Lista de ciudades con weather_data
+deactivate API
+LV --> User: Muestra resultados de búsqueda
+
+== Agregar a Favoritos ==
+User -> LV: Click en "Agregar a Favoritos" con datos JSON
+activate LV
+LV -> API: get_forecast_by_coords(lat, lon)
+activate API
+API -> OW: GET /forecast?lat=...&lon=...&units=metric&appid=API_KEY
+activate OW
+OW --> API: JSON (forecast completo)
+deactivate OW
+API --> LV: Forecast JSON
+deactivate API
+LV: Procesa forecast (hourly_forecast y daily_forecast)
+LV -> Fav: create_city(data completa)
+activate Fav
+Fav -> Repo: INSERT city record
+activate Repo
+Repo --> Fav: Retorna éxito
+deactivate Repo
+Fav --> LV: Retorna ciudad guardada
+deactivate Fav
+LV --> User: Actualiza vista con favoritos, clima y forecast
+
+== Seleccionar Ciudad Favorita ==
+User -> LV: Click en "Seleccionar Ciudad" (favorito)
+activate LV
+LV -> Fav: get_city_by_name(city_name)
+activate Fav
+Fav -> Repo: Query city record by name
+activate Repo
+Repo --> Fav: Retorna registro de la ciudad
+deactivate Repo
+Fav --> LV: Retorna datos de la ciudad (data completa)
+deactivate Fav
+LV --> User: Actualiza vista con clima actual y forecast
+deactivate LV
