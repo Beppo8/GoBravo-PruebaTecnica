@@ -9,6 +9,13 @@ defmodule WeatherApp.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        coveralls: :test,
+        "coveralls.detail": :test,
+        "coveralls.post": :test,
+        "coveralls.html": :test
+      ],
       deps: deps()
     ]
   end
@@ -60,7 +67,8 @@ defmodule WeatherApp.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:bandit, "~> 1.5"},
       {:typed_struct, "~> 0.3.0"},
-      {:bypass, "~> 2.1"}
+      {:bypass, "~> 2.1"},
+      {:excoveralls, "~> 0.14", only: :test}
     ]
   end
 
