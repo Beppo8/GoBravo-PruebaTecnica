@@ -1,0 +1,25 @@
+@startuml C4_Container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+' Definir al usuario que interactúa con la aplicación
+Person(user, "Usuario", "Persona que consulta el clima mediante una interfaz web")
+
+' Definir el límite del sistema "Weather App"
+System_Boundary(s1, "Weather App") {
+  Container(web_app, "Phoenix LiveView App", "Elixir / Phoenix", "Aplicación web interactiva que muestra el clima y gestiona favoritos en tiempo real")
+  
+  Container(weather_api, "WeatherAPI Module", "Elixir", "Módulo que integra OpenWeather API para obtener el clima actual y forecast, y realiza transformaciones de datos")
+  
+  ContainerDb(database, "PostgreSQL Database", "PostgreSQL", "Almacena la lista de ciudades favoritas junto con su información de clima y forecast")
+}
+
+' Sistema externo de OpenWeather API
+System_Ext(ow_api, "OpenWeather API", "Servicio externo", "Provee información en tiempo real del clima y pronósticos")
+
+' Relaciones entre elementos
+Rel(user, web_app, "Usa", "HTTPS")
+Rel(web_app, weather_api, "Consulta datos de clima y forecast", "HTTP/JSON")
+Rel(web_app, database, "Lee y escribe datos", "Ecto / SQL")
+Rel(weather_api, ow_api, "Consulta información de clima", "HTTP/JSON")
+
+@enduml
