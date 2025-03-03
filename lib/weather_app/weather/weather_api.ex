@@ -10,6 +10,7 @@ defmodule Weather.WeatherAPI do
   alias WeatherApp.WeatherData
   alias WeatherApp.ForecastEntry
 
+  @spec get_current_weather(String.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def get_current_weather(city) do
     url = "#{base_url()}/weather?q=#{URI.encode(city)}&units=metric&appid=#{api_key()}"
 
@@ -37,6 +38,7 @@ defmodule Weather.WeatherAPI do
     end
   end
 
+  @spec get_forecast(String.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def get_forecast(city) do
     url = "#{base_url()}/forecast?q=#{URI.encode(city)}&units=metric&appid=#{api_key()}"
 
@@ -52,6 +54,7 @@ defmodule Weather.WeatherAPI do
     end
   end
 
+  @spec get_forecast_by_coords(Float.t(), Float.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def get_forecast_by_coords(lat, lon) do
     url = "#{base_url()}/forecast?lat=#{lat}&lon=#{lon}&units=metric&appid=#{api_key()}"
 
@@ -67,6 +70,7 @@ defmodule Weather.WeatherAPI do
     end
   end
 
+  @spec hourly_forecast(ForecastEntry.t()) :: List.t()
   def hourly_forecast(forecast) do
     forecast["list"]
     |> Enum.take(8)
@@ -84,6 +88,7 @@ defmodule Weather.WeatherAPI do
     end)
   end
 
+  @spec daily_forecast(ForecastEntry.t()) :: List.t()
   def daily_forecast(forecast) do
     forecast["list"]
     |> Enum.group_by(fn entry ->
@@ -98,6 +103,7 @@ defmodule Weather.WeatherAPI do
     |> Enum.reject(fn %{date: date} -> date == Date.utc_today() end)
   end
 
+  @spec search_city(String.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def search_city(query) do
     limit = 5
 
@@ -129,6 +135,7 @@ defmodule Weather.WeatherAPI do
     end
   end
 
+  @spec get_current_weather_by_coords(Float.t(), Float.t()) :: {:ok, Map.t()} | {:error, String.t()}
   def get_current_weather_by_coords(lat, lon) do
     url = "#{base_url()}/weather?lat=#{lat}&lon=#{lon}&units=metric&appid=#{api_key()}"
 
