@@ -13,7 +13,7 @@ defmodule WeatherApp.Application do
       {DNSCluster, query: Application.get_env(:weather_app, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: WeatherApp.PubSub},
       # Start the Finch HTTP client for sending emails
-      {Finch, name: WeatherApp.Finch},
+      {Finch, name: MyFinch},
       # Start a worker by calling: WeatherApp.Worker.start_link(arg)
       # {WeatherApp.Worker, arg},
       # Start to serve requests, typically the last entry
