@@ -1,7 +1,9 @@
 # WeatherApp
+Elixir
+Se requiere una version superior a la 1.15.
 
 Phoenix:
-Es necesario Phoenix 1.7 o superior. Si aún no lo tienes, puedes instalarlo con:
+Es necesario Phoenix 1.7 o superior.
 
 To start your Phoenix server:
 
