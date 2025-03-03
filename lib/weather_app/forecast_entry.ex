@@ -1,4 +1,5 @@
 defmodule WeatherApp.ForecastEntry do
+  @derive {Jason.Encoder, only: [:dt, :dt_txt, :temp, :temp_min, :temp_max, :description, :icon]}
   use TypedStruct
 
   @moduledoc """

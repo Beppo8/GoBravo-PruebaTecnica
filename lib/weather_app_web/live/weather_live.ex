@@ -3,7 +3,6 @@ defmodule WeatherAppWeb.WeatherLive do
 
   alias Weather.WeatherAPI
   alias WeatherApp.Favorites
-  alias WeatherApp.Favorites.City
 
   @impl true
   def mount(_params, _session, socket) do
