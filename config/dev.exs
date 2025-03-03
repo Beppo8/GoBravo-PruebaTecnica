@@ -62,6 +62,10 @@ config :weather_app, WeatherAppWeb.Endpoint,
     ]
   ]
 
+config :weather_app, Weather.WeatherAPI,
+  api_key: System.get_env("OPENWEATHER_API_KEY") || "a766adb5c2111bb6092d6d7c04e9991c",
+  base_url: "https://api.openweathermap.org/data/2.5"
+
 # Enable dev routes for dashboard and mailbox
 config :weather_app, dev_routes: true
 
