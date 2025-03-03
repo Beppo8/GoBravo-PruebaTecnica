@@ -3,15 +3,15 @@ defmodule Weather.WeatherAPI do
   Cliente para consumir la API de OpenWeather.
   """
 
-  @api_key Application.fetch_env!(:weather_app, Weather.WeatherAPI)[:api_key]
-  @base_url Application.fetch_env!(:weather_app, Weather.WeatherAPI)[:base_url]
+  # Funciones para obtener la configuración en tiempo de ejecución
+  defp api_key, do: Application.fetch_env!(:weather_app, Weather.WeatherAPI)[:api_key]
+  defp base_url, do: Application.fetch_env!(:weather_app, Weather.WeatherAPI)[:base_url]
 
   alias WeatherApp.WeatherData
   alias WeatherApp.ForecastEntry
 
-  # Obtiene el clima actual de una ciudad y lo transforma en una estructura %WeatherData{}
   def get_current_weather(city) do
-    url = "#{@base_url}/weather?q=#{URI.encode(city)}&units=metric&appid=#{@api_key}"
+    url = "#{base_url()}/weather?q=#{URI.encode(city)}&units=metric&appid=#{api_key()}"
     case Finch.build(:get, url) |> Finch.request(MyFinch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         data = Jason.decode!(body)
@@ -31,9 +31,8 @@ defmodule Weather.WeatherAPI do
     end
   end
 
-  # Obtiene el forecast (pronóstico) de una ciudad por nombre
   def get_forecast(city) do
-    url = "#{@base_url}/forecast?q=#{URI.encode(city)}&units=metric&appid=#{@api_key}"
+    url = "#{base_url()}/forecast?q=#{URI.encode(city)}&units=metric&appid=#{api_key()}"
     case Finch.build(:get, url) |> Finch.request(MyFinch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
@@ -44,9 +43,8 @@ defmodule Weather.WeatherAPI do
     end
   end
 
-  # Obtiene el forecast utilizando coordenadas (lat, lon)
   def get_forecast_by_coords(lat, lon) do
-    url = "#{@base_url}/forecast?lat=#{lat}&lon=#{lon}&units=metric&appid=#{@api_key}"
+    url = "#{base_url()}/forecast?lat=#{lat}&lon=#{lon}&units=metric&appid=#{api_key()}"
     case Finch.build(:get, url) |> Finch.request(MyFinch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}
@@ -57,7 +55,6 @@ defmodule Weather.WeatherAPI do
     end
   end
 
-  # Extrae el forecast por hora: toma las primeras 8 entradas (aproximadamente 24 horas)
   def hourly_forecast(forecast) do
     forecast["list"]
     |> Enum.take(8)
@@ -74,7 +71,6 @@ defmodule Weather.WeatherAPI do
        end)
   end
 
-  # Agrupa las entradas del forecast por día y calcula temperaturas mínimas y máximas (descartando el día actual)
   def daily_forecast(forecast) do
     forecast["list"]
     |> Enum.group_by(fn entry ->
@@ -89,10 +85,9 @@ defmodule Weather.WeatherAPI do
     |> Enum.reject(fn %{date: date} -> date == Date.utc_today() end)
   end
 
-  # Búsqueda de ciudades utilizando el endpoint de geocoding y obteniendo el clima actual
   def search_city(query) do
     limit = 5
-    url = "http://api.openweathermap.org/geo/1.0/direct?q=#{URI.encode(query)}&limit=#{limit}&appid=#{@api_key}"
+    url = "http://api.openweathermap.org/geo/1.0/direct?q=#{URI.encode(query)}&limit=#{limit}&appid=#{api_key()}"
     case Finch.build(:get, url) |> Finch.request(MyFinch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         results = Jason.decode!(body)
@@ -114,9 +109,8 @@ defmodule Weather.WeatherAPI do
     end
   end
 
-  # Obtiene el clima actual utilizando coordenadas (lat, lon)
   def get_current_weather_by_coords(lat, lon) do
-    url = "#{@base_url}/weather?lat=#{lat}&lon=#{lon}&units=metric&appid=#{@api_key}"
+    url = "#{base_url()}/weather?lat=#{lat}&lon=#{lon}&units=metric&appid=#{api_key()}"
     case Finch.build(:get, url) |> Finch.request(MyFinch) do
       {:ok, %Finch.Response{status: 200, body: body}} ->
         {:ok, Jason.decode!(body)}

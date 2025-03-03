@@ -20,6 +20,10 @@ config :weather_app, WeatherAppWeb.Endpoint,
   secret_key_base: "m/rs2KpsE3dSUFgtxwbRci+I3lr9effme2XZxM0i8q2tqZJJtPWG9/gx26LkjIf6",
   server: false
 
+config :weather_app, Weather.WeatherAPI,
+  api_key: System.get_env("OPENWEATHER_API_KEY") || "a766adb5c2111bb6092d6d7c04e9991c",
+  base_url: "https://api.openweathermap.org/data/2.5"
+
 # In test we don't send emails
 config :weather_app, WeatherApp.Mailer, adapter: Swoosh.Adapters.Test
 
