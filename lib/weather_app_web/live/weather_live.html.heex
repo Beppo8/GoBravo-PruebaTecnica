@@ -1,36 +1,36 @@
 <div class="container">
   <h1>Consulta de Clima</h1>
-
-  <!-- Buscador de ciudades -->
+  
+<!-- Buscador de ciudades -->
   <form phx-submit="search">
     <input type="text" name="query" value={@query} placeholder="Buscar ciudad..." />
     <button type="submit">Buscar</button>
   </form>
-
-  <!-- Resultados de búsqueda -->
+  
+<!-- Resultados de búsqueda -->
   <div>
     <h2>Resultados de búsqueda</h2>
     <ul>
       <%= for result <- @results do %>
         <li>
           <strong>
-            <%= result["name"] %>, <%= result["country"] %>
-            <%= if result["state"], do: " (#{result["state"]})" %>
+            {result["name"]}, {result["country"]}
+            {if result["state"], do: " (#{result["state"]})"}
           </strong>
-          <br/>
+          <br />
           <span>
-            Temp: <%= result["weather_data"]["main"]["temp"] %> °C,
-            Mín: <%= result["weather_data"]["main"]["temp_min"] %> °C,
-            Máx: <%= result["weather_data"]["main"]["temp_max"] %> °C
+            Temp: {result["weather_data"]["main"]["temp"]} °C,
+            Mín: {result["weather_data"]["main"]["temp_min"]} °C,
+            Máx: {result["weather_data"]["main"]["temp_max"]} °C
           </span>
-          <br/>
+          <br />
           <% weather_list = result["weather_data"]["weather"] || [] %>
           <%= if weather = List.first(weather_list) do %>
-            <em><%= weather["description"] %></em>
+            <em>{weather["description"]}</em>
           <% else %>
             <em>Sin descripción</em>
           <% end %>
-          <br/>
+          <br />
           <!-- Enviar la información completa en JSON para agregar a favoritos -->
           <button phx-click="add_favorite" phx-value-data={Jason.encode!(result)}>
             Agregar a Favoritos
@@ -39,27 +39,27 @@
       <% end %>
     </ul>
   </div>
-
-  <!-- Ciudades favoritas -->
+  
+<!-- Ciudades favoritas -->
   <div>
     <h2>Favoritos</h2>
     <ul>
       <%= for city <- @favorites do %>
         <li phx-click="select_city" phx-value-city={city.name}>
           <strong>
-            <%= city.data["name"] %>, <%= city.data["country"] %>
-            <%= if city.data["state"], do: " (#{city.data["state"]})" %>
+            {city.data["name"]}, {city.data["country"]}
+            {if city.data["state"], do: " (#{city.data["state"]})"}
           </strong>
-          <br/>
+          <br />
           <span>
-            Temp: <%= city.data["weather_data"]["main"]["temp"] %> °C,
-            Mín: <%= city.data["weather_data"]["main"]["temp_min"] %> °C,
-            Máx: <%= city.data["weather_data"]["main"]["temp_max"] %> °C
+            Temp: {city.data["weather_data"]["main"]["temp"]} °C,
+            Mín: {city.data["weather_data"]["main"]["temp_min"]} °C,
+            Máx: {city.data["weather_data"]["main"]["temp_max"]} °C
           </span>
-          <br/>
+          <br />
           <% fav_weather_list = city.data["weather_data"]["weather"] || [] %>
           <%= if weather = List.first(fav_weather_list) do %>
-            <em><%= weather["description"] %></em>
+            <em>{weather["description"]}</em>
           <% else %>
             <em>Sin descripción</em>
           <% end %>
@@ -67,24 +67,24 @@
       <% end %>
     </ul>
   </div>
-
-  <!-- Clima actual de la ciudad seleccionada -->
+  
+<!-- Clima actual de la ciudad seleccionada -->
   <div>
     <%= if @weather do %>
-      <h2>Clima en <%= @weather["name"] %></h2>
-      <p>Temperatura actual: <%= @weather["main"]["temp"] %> °C</p>
-      <p>Mínima: <%= @weather["main"]["temp_min"] %> °C, Máxima: <%= @weather["main"]["temp_max"] %> °C</p>
+      <h2>Clima en {@weather["name"]}</h2>
+      <p>Temperatura actual: {@weather["main"]["temp"]} °C</p>
+      <p>Mínima: {@weather["main"]["temp_min"]} °C, Máxima: {@weather["main"]["temp_max"]} °C</p>
     <% end %>
   </div>
-
-  <!-- Pronóstico por hora (próximas 24 horas) -->
+  
+<!-- Pronóstico por hora (próximas 24 horas) -->
   <div>
     <%= if @hourly_forecast && @hourly_forecast != [] do %>
       <h2>Pronóstico por hora (próximas 24 horas)</h2>
       <ul>
         <%= for entry <- @hourly_forecast do %>
           <li>
-            <strong><%= entry.dt_txt %></strong>: <%= entry.temp %> °C
+            <strong><%= entry.dt_txt %></strong>: {entry.temp} °C
           </li>
         <% end %>
       </ul>
@@ -92,15 +92,15 @@
       <p>No se encontró información horaria.</p>
     <% end %>
   </div>
-
-  <!-- Pronóstico diario (resto de la semana) -->
+  
+<!-- Pronóstico diario (resto de la semana) -->
   <div>
     <%= if @daily_forecast && @daily_forecast != [] do %>
       <h2>Pronóstico diario (resto de la semana)</h2>
       <ul>
         <%= for day <- @daily_forecast do %>
           <li>
-            <strong><%= day.date %></strong>: Mín: <%= day.temp_min %> °C, Máx: <%= day.temp_max %> °C
+            <strong><%= day.date %></strong>: Mín: {day.temp_min} °C, Máx: {day.temp_max} °C
           </li>
         <% end %>
       </ul>
