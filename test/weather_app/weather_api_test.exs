@@ -7,7 +7,7 @@ defmodule Weather.WeatherAPITest do
   setup do
     bypass = Bypass.open()
 
-    # Guarda la configuración original y sobreescribe la base_url para los tests
+    # Se guarda la configuración original y se sobreescribe la base_url en tiempo de ejecución.
     original_config = Application.get_env(:weather_app, Weather.WeatherAPI)
     Application.put_env(:weather_app, Weather.WeatherAPI, Keyword.put(original_config, :base_url, "http://localhost:#{bypass.port}"))
 
@@ -33,7 +33,6 @@ defmodule Weather.WeatherAPITest do
       "name": "TestCity"
     })
 
-    # Para este test, respondemos 200 para cualquier request
     Bypass.expect(bypass, fn conn ->
       Plug.Conn.resp(conn, 200, response_body)
     end)
@@ -49,8 +48,56 @@ defmodule Weather.WeatherAPITest do
       description: "clear sky",
       icon: "01d"
     }
-
     assert expected == result["weather_data"]
+  end
+
+  test "get_current_weather_by_coords returns weather data", %{bypass: bypass} do
+    response_body = ~s({
+      "main": {
+        "temp": 20.0,
+        "temp_min": 18.0,
+        "temp_max": 22.0,
+        "humidity": 70
+      },
+      "weather": [{
+         "description": "partly cloudy",
+         "icon": "02d"
+      }],
+      "name": "CoordCity"
+    })
+
+    Bypass.expect(bypass, fn conn ->
+      Plug.Conn.resp(conn, 200, response_body)
+    end)
+
+    {:ok, result} = WeatherAPI.get_current_weather_by_coords(10.0, 20.0)
+    assert result["name"] == "CoordCity"
+  end
+
+  test "get_forecast returns forecast data", %{bypass: bypass} do
+    forecast_entries =
+      Enum.map(1..5, fn i ->
+        %{
+          "dt" => 1600000000 + i * 10800,
+          "dt_txt" => "2020-09-13 #{i}:00:00",
+          "main" => %{
+            "temp" => 10.0 + i,
+            "temp_min" => 9.0 + i,
+            "temp_max" => 11.0 + i
+          },
+          "weather" => [
+            %{"description" => "rain", "icon" => "10d"}
+          ]
+        }
+      end)
+
+    response_body = Jason.encode!(%{"list" => forecast_entries})
+    Bypass.expect(bypass, fn conn ->
+      Plug.Conn.resp(conn, 200, response_body)
+    end)
+
+    {:ok, forecast} = WeatherAPI.get_forecast("TestCity")
+    assert is_list(forecast["list"])
   end
 
   test "hourly_forecast returns first 8 entries as ForecastEntry structs", %{bypass: bypass} do
@@ -69,10 +116,7 @@ defmodule Weather.WeatherAPITest do
           ]
         }
       end)
-
     response_body = Jason.encode!(%{"list" => forecast_entries})
-
-    # Responder 200 para cualquier request en este test
     Bypass.expect(bypass, fn conn ->
       Plug.Conn.resp(conn, 200, response_body)
     end)
@@ -80,9 +124,8 @@ defmodule Weather.WeatherAPITest do
     {:ok, forecast} = WeatherAPI.get_forecast("TestCity")
     hourly = WeatherAPI.hourly_forecast(forecast)
     assert length(hourly) == 8
-
     first_entry = hd(hourly)
-    # Para i=1, se espera que temp = 10.0 + 1 = 11.0
+    # Para i = 1, se espera que temp = 11.0
     assert first_entry.temp == 11.0
   end
 
@@ -96,14 +139,12 @@ defmodule Weather.WeatherAPITest do
     end)
     forecast_list = entries_day1 ++ entries_day2
     response_body = Jason.encode!(%{"list" => forecast_list})
-
     Bypass.expect(bypass, fn conn ->
       Plug.Conn.resp(conn, 200, response_body)
     end)
 
     {:ok, forecast} = WeatherAPI.get_forecast("TestCity")
     daily = WeatherAPI.daily_forecast(forecast)
-    # Se espera que se agrupe al menos en una entrada (dependiendo de la fecha actual)
     assert length(daily) >= 1
   end
 end
