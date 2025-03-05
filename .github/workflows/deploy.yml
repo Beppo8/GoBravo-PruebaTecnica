@@ -1,0 +1,79 @@
+name: Build, Test and Deploy to DigitalOcean
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: prod
+      SECRET_KEY_BASE: ${{ secrets.SECRET_KEY_BASE }}
+      OPENWEATHER_API_KEY: ${{ secrets.OPENWEATHER_API_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+    steps:
+      - name: Checkout code
+        uses: actions/upload-artifact@v4
+        with:
+          name: weather_app-release
+          path: _build/prod/rel/weather_app
+
+      - name: Setup Elixir
+        uses: erlef/setup-elixir@v1
+        with:
+          elixir-version: '1.14'
+          otp-version: '25'
+
+      - name: Install dependencies
+        run: |
+          mix local.hex --force
+          mix deps.get --only prod
+        working-directory: ${{ github.workspace }}
+
+      - name: Compile project
+        run: mix compile
+        working-directory: ${{ github.workspace }}
+
+      - name: Run tests
+        run: mix test
+        working-directory: ${{ github.workspace }}
+
+      - name: Build release
+        run: mix release
+        working-directory: ${{ github.workspace }}
+
+      - name: Upload release artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: weather_app-release
+          path: _build/prod/rel/weather_app
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Download release artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: weather_app-release
+          path: release
+
+      - name: Deploy to DigitalOcean Droplet via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.DEPLOY_HOST }}
+          username: ${{ secrets.DEPLOY_USER }}    
+          key: ${{ secrets.DEPLOY_SSH_KEY }}      
+          port: ${{ secrets.DEPLOY_PORT }}        
+          script: |
+            cd /home/${{ secrets.DEPLOY_USER }}/weather_app
+            echo "Deteniendo aplicación anterior (si existe)..."
+            ./bin/weather_app stop || true
+            echo "Actualizando release..."
+            rm -rf weather_app && cp -R $GITHUB_WORKSPACE/release/weather_app .
+            echo "Ejecutando migraciones..."
+            ./bin/weather_app eval "WeatherApp.Release.migrate()"
+            echo "Iniciando la aplicación..."
+            ./bin/weather_app start

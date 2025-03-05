@@ -72,9 +72,6 @@ Se persisten los datos del clima y forecast al agregar una ciudad a favoritos pa
 
 ### Si Tuviera Más Tiempo, Mejoraría:
 
-* Pruebas Automatizadas:
-Agregar una batería completa de pruebas unitarias e integradas para asegurar la calidad del código.
-
 * Caché y Actualización de Datos:
 Implementar mecanismos de caché y refresco de datos para mantener la información actualizada sin hacer llamadas excesivas a la API.
 

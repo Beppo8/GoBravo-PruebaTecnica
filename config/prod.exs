@@ -17,5 +17,13 @@ config :swoosh, local: false
 # Do not print debug messages in production
 config :logger, level: :info
 
+config :weather_app, Weather.WeatherAPI,
+  api_key: System.get_env("OPENWEATHER_API_KEY"),
+  base_url: "https://api.openweathermap.org/data/2.5"
+
+config :weather_app, WeatherApp.Repo,
+  url: System.get_env("DATABASE_URL"),
+  pool_size: String.to_integer(System.get_env("POOL_SIZE") || "10")
+
 # Runtime production configuration, including reading
 # of environment variables, is done on config/runtime.exs.
